@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>3D-Karte · Verladeregister Deutschland</title>
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 :root{--panel:#FFFFFF;--ink:#22262B;--ink-2:#5A626C;--line:#D4D8DC;--accent:#F0B400;--accent-ink:#1A1400}
 @media (prefers-color-scheme: dark){:root{--panel:#1E2126;--ink:#E8EAEC;--ink-2:#9AA2AC;--line:#33383E}}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body,#map{height:100%}
-body{font:13px/1.4 "Helvetica Neue",Arial,sans-serif;color:var(--ink)}
-#hud{position:absolute;top:12px;left:12px;z-index:5;background:var(--panel);border:1px solid var(--line);padding:12px 14px;max-width:290px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+html,body{height:100%;overflow:hidden}
+body{font:13px/1.4 "Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#0b0e12}
+#deck{position:absolute;inset:0}
+#hud{position:absolute;top:12px;left:12px;z-index:5;background:var(--panel);border:1px solid var(--line);padding:12px 14px;max-width:290px;box-shadow:0 2px 10px rgba(0,0,0,.35)}
 #hud h1{font-size:15px;text-transform:uppercase;letter-spacing:.05em}
 #hud h1 span{background:var(--accent);color:var(--accent-ink);padding:0 6px}
 #hud .sub{color:var(--ink-2);font-size:11.5px;margin:5px 0 9px}
@@ -19,16 +19,18 @@ body{font:13px/1.4 "Helvetica Neue",Arial,sans-serif;color:var(--ink)}
 .btnrow button,.btnrow a{padding:6px 10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font:inherit;font-weight:600;text-decoration:none;font-size:12px}
 .btnrow .on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 #legend{margin-top:9px;font-size:11px;color:var(--ink-2)}
-.maplibregl-popup-content{font:12.5px/1.45 "Helvetica Neue",Arial,sans-serif;color:#22262B;max-width:300px}
-.maplibregl-popup-content b.co{font-size:13.5px}
-.maplibregl-popup-content .chip{background:#F0B400;color:#1A1400;font-weight:700;padding:0 6px;font-size:10.5px;letter-spacing:.03em}
-.maplibregl-popup-content .chip.b{background:#E4E7EA;color:#22262B;font-weight:600}
-.maplibregl-popup-content a{color:#0B62C4}
-.maplibregl-popup-content .row{margin-top:5px}
+#attrib{position:absolute;bottom:0;right:0;z-index:5;background:rgba(255,255,255,.75);color:#333;font-size:10.5px;padding:2px 8px}
+#pop{position:absolute;z-index:6;display:none;background:#fff;color:#22262B;border:1px solid #D4D8DC;box-shadow:0 4px 16px rgba(0,0,0,.35);padding:11px 13px;max-width:310px;font-size:12.5px;line-height:1.45}
+#pop b.co{font-size:13.5px}
+#pop .chip{background:#F0B400;color:#1A1400;font-weight:700;padding:0 6px;font-size:10.5px;letter-spacing:.03em}
+#pop .chip.b{background:#E4E7EA;color:#22262B;font-weight:600}
+#pop a{color:#0B62C4}
+#pop .row{margin-top:5px}
+#pop .x{position:absolute;top:4px;right:8px;cursor:pointer;font-weight:700;color:#5A626C}
 </style>
 </head>
 <body>
-<div id="map"></div>
+<div id="deck"></div>
 <div id="hud">
   <h1><span>Verladeregister</span> 3D-Karte</h1>
   <div class="sub" id="count">Lade Datensatz …</div>
@@ -38,48 +40,36 @@ body{font:13px/1.4 "Helvetica Neue",Arial,sans-serif;color:var(--ink)}
     <button id="mver">Nur verifiziert</button>
     <a href="index.html">Register</a>
   </div>
-  <div id="legend">Säulenhöhe = Anzahl Betriebe im Raster. Reinzoomen zeigt Einzelstandorte, Klick öffnet Details mit Satellit-Link.</div>
+  <div id="legend">Säulenhöhe = Anzahl Betriebe im Raster. Reinzoomen zeigt Einzelstandorte, Klick öffnet Details mit Satellit-Link. Rechte Maustaste/Strg: Ansicht drehen.</div>
 </div>
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<div id="pop"><span class="x" onclick="pop.style.display='none'">×</span><div id="popc"></div></div>
+<div id="attrib">Bilder © Esri, Maxar, Earthstar Geographics · Daten © OpenStreetMap-Mitwirkende (ODbL)</div>
 <script src="https://unpkg.com/deck.gl@9.0.36/dist.min.js"></script>
 <script>
-const map = new maplibregl.Map({
-  container:'map',
-  style:{
-    version:8,
-    sources:{
-      sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,attribution:'Bilder © Esri, Maxar, Earthstar Geographics | Daten © OpenStreetMap-Mitwirkende (ODbL)'},
-      lbl:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],tileSize:256}
-    },
-    layers:[
-      {id:'sat',type:'raster',source:'sat'},
-      {id:'lbl',type:'raster',source:'lbl',paint:{'raster-opacity':0.85}}
-    ]
-  },
-  center:[10.35,51.15], zoom:5.6, pitch:52, bearing:-12, maxPitch:70, antialias:true
-});
-map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
-
-let DATA=[], mode='3d', onlyVer=false, overlay=null;
+let DATA=[], mode='3d', onlyVer=false, deckgl=null;
 const YELLOW=[240,180,0], DARK=[34,38,43];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-fetch('data/leads.min.json').then(r=>r.json()).then(d=>{
-  const F={}; d.fields.forEach((f,i)=>F[f]=i);
-  DATA=d.rows.filter(r=>r[F.lat]&&r[F.lon]).map(r=>({
-    p:[r[F.lon],r[F.lat]],
-    ver:r[F.tier]==='verifiziert',
-    co:r[F.company],ad:r[F.address],plz:r[F.plz],ci:r[F.city],bl:r[F.bundesland],
-    ind:r[F.industry],br:r[F.brand],doors:r[F.doors_in_use],yr:r[F.year],
-    ph:r[F.phone],em:r[F.email],web:r[F.website],src:r[F.source_url],foto:r[F.photo_url],
-    lat:r[F.lat],lon:r[F.lon]
-  }));
-  document.getElementById('count').textContent=DATA.length.toLocaleString('de-DE')+' Standorte in Deutschland · Stand 07/2026';
-  overlay=new deck.MapboxOverlay({interleaved:false,layers:[]});
-  map.addControl(overlay);
-  update();
-});
-
-function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function baseLayers(){
+  return [
+    new deck.TileLayer({
+      id:'sat', data:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      minZoom:0, maxZoom:19, tileSize:256,
+      renderSubLayers: p => {
+        const {west,south,east,north} = p.tile.bbox;
+        return new deck.BitmapLayer(p, {data:null, image:p.data, bounds:[west,south,east,north]});
+      }
+    }),
+    new deck.TileLayer({
+      id:'lbl', data:'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      minZoom:0, maxZoom:19, tileSize:256, opacity:0.9,
+      renderSubLayers: p => {
+        const {west,south,east,north} = p.tile.bbox;
+        return new deck.BitmapLayer(p, {data:null, image:p.data, bounds:[west,south,east,north]});
+      }
+    })
+  ];
+}
 function popupHTML(o){
   const sat=`https://maps.google.com/?q=${o.lat.toFixed(6)},${o.lon.toFixed(6)}&t=k`;
   let h=`<b class="co">${esc(o.co)}</b> <span class="chip ${o.ver?'':'b'}">${o.ver?'VERIFIZIERT':'BASIS'}</span>`;
@@ -97,7 +87,7 @@ function popupHTML(o){
   h+=`<div class="row">${L.join(' · ')}</div>`;
   return h;
 }
-function layers(){
+function dataLayers(){
   const src=onlyVer?DATA.filter(o=>o.ver):DATA;
   const L=[];
   if(mode==='3d'){
@@ -106,7 +96,7 @@ function layers(){
       radius:6000,coverage:0.82,extruded:true,
       elevationScale:1,elevationRange:[0,45000],
       colorRange:[[255,244,200],[250,220,110],[240,180,0],[214,140,0],[176,96,0],[130,60,10]],
-      opacity:0.78,pickable:false
+      opacity:0.55,pickable:false
     }));
   }
   L.push(new deck.ScatterplotLayer({
@@ -114,22 +104,45 @@ function layers(){
     getFillColor:o=>o.ver?DARK:YELLOW,
     getLineColor:o=>o.ver?YELLOW:DARK,
     getRadius:o=>o.ver?160:90,
-    radiusMinPixels:mode==='3d'?1.2:2.2,radiusMaxPixels:14,
+    radiusMinPixels:mode==='3d'?1.2:2.4,radiusMaxPixels:14,
     stroked:true,lineWidthMinPixels:1,
-    opacity:mode==='3d'?0.55:0.9,
-    pickable:true,
-    onClick:info=>{
-      if(!info.object)return;
-      new maplibregl.Popup({closeButton:true,maxWidth:'320px'})
-        .setLngLat(info.object.p).setHTML(popupHTML(info.object)).addTo(map);
-    }
+    opacity:mode==='3d'?0.6:0.95,
+    pickable:true
   }));
   return L;
 }
-function update(){overlay.setProps({layers:layers()});}
+function update(){deckgl.setProps({layers:[...baseLayers(),...dataLayers()]});}
+fetch('data/leads.min.json').then(r=>r.json()).then(d=>{
+  const F={}; d.fields.forEach((f,i)=>F[f]=i);
+  DATA=d.rows.filter(r=>r[F.lat]&&r[F.lon]).map(r=>({
+    p:[r[F.lon],r[F.lat]],
+    ver:r[F.tier]==='verifiziert',
+    co:r[F.company],ad:r[F.address],plz:r[F.plz],ci:r[F.city],bl:r[F.bundesland],
+    ind:r[F.industry],br:r[F.brand],doors:r[F.doors_in_use],yr:r[F.year],
+    ph:r[F.phone],em:r[F.email],web:r[F.website],src:r[F.source_url],foto:r[F.photo_url],
+    lat:r[F.lat],lon:r[F.lon]
+  }));
+  document.getElementById('count').textContent=DATA.length.toLocaleString('de-DE')+' Standorte in Deutschland · Stand 07/2026';
+  deckgl=new deck.DeckGL({
+    container:'deck',
+    initialViewState:{longitude:10.35,latitude:51.15,zoom:5.7,pitch:52,bearing:-12,maxPitch:70},
+    controller:{inertia:250},
+    layers:[],
+    onClick:info=>{
+      if(info.layer&&info.layer.id==='pts'&&info.object){
+        popc.innerHTML=popupHTML(info.object);
+        pop.style.display='block';
+        const px=Math.min(info.x,window.innerWidth-330), py=Math.min(info.y,window.innerHeight-260);
+        pop.style.left=Math.max(8,px)+'px'; pop.style.top=Math.max(8,py)+'px';
+      } else { pop.style.display='none'; }
+    },
+    getCursor:({isHovering})=>isHovering?'pointer':'grab'
+  });
+  update();
+});
 const b3=document.getElementById('m3d'),bp=document.getElementById('mpt'),bv=document.getElementById('mver');
-b3.onclick=()=>{mode='3d';b3.classList.add('on');bp.classList.remove('on');map.easeTo({pitch:52});update();};
-bp.onclick=()=>{mode='pt';bp.classList.add('on');b3.classList.remove('on');map.easeTo({pitch:20});update();};
+b3.onclick=()=>{mode='3d';b3.classList.add('on');bp.classList.remove('on');update();};
+bp.onclick=()=>{mode='pt';bp.classList.add('on');b3.classList.remove('on');update();};
 bv.onclick=()=>{onlyVer=!onlyVer;bv.classList.toggle('on',onlyVer);update();};
 </script>
 </body>
