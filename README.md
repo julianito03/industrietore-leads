@@ -1,13 +1,21 @@
-# Tor-Leads Deutschland
+# Verladeregister Deutschland — Tor-Leads
 
-Register deutscher Standorte mit Überladebrücken, Verladetechnik und Industrietoren — recherchiert aus öffentlichen Hersteller-Referenzen (Hörmann, Novoferm, EFAFLEX, Teckentrup, ASSA ABLOY, PROMStahl u. a.), Fachpresse und Pressemitteilungen.
-
-**120 Einträge** — davon 58 mit identifizierter Tor-Marke, 42 mit Anlagen-Foto, 40 in der Region Bergstraße/Rhein-Main/Rhein-Neckar. Jeder Eintrag mit Adresse, Kontaktdaten, Quellenlink und Google-Maps-Satellitenansicht.
+Deutschlandweite Lead-Datenbank: Betriebe mit Überladebrücken, Verladerampen und Industrietoren.
+**24.625 Standorte** (Stand 07/2026), davon **663 verifiziert** (Tor-/Verladetechnik-Einsatz per Quelle belegt: Herstellerreferenzen Hörmann/Novoferm/EFAFLEX/PROMStahl/Butt u. a., Fachpresse, Projektmeldungen) und ~24.000 Basis-Standorte (Lager-, Logistik-, Produktions- und Depotstandorte aus OpenStreetMap).
 
 ## Nutzung
 
-- **Browser:** [Datenbank öffnen](https://julianito03.github.io/tor-leads/) — durchsuchbar und filterbar
-- **Excel:** [`tor-leads.xlsx`](tor-leads.xlsx)
-- **CSV / JSON:** [`leads.csv`](leads.csv) · [`leads.json`](leads.json)
+- **Register (Suche/Filter):** https://julianito03.github.io/industrietore-leads/
+- **3D-Karte (Satellit, ganz Deutschland):** https://julianito03.github.io/industrietore-leads/karte.html
+- **Excel:** [tor-leads.xlsx](tor-leads.xlsx) · **CSV:** [leads.csv](leads.csv) · **JSON:** [leads.json](leads.json)
+- Archiv der ursprünglichen 120 kuratierten Einträge: [archiv-120.html](archiv-120.html)
 
-Stand: Juli 2026. Alle Angaben aus öffentlichen Quellen, ohne Gewähr.
+## Felder
+
+Firma, Adresse, PLZ, Ort, Bundesland, Branche, Tier (verifiziert/basis), Tor-/Rampenmarke, Tore/Verladetechnik im Einsatz, Jahr, Telefon, E-Mail, Website, Quelle + Quell-URL, Foto, Google-Maps-Satellitenlink, Koordinaten.
+
+## Quellen & Lizenz
+
+Recherchierte Einträge: öffentliche Herstellerreferenzen und Fachpresse (Quell-URL je Eintrag).
+Basis-Standorte: © OpenStreetMap-Mitwirkende, [ODbL](https://opendatacommons.org/licenses/odbl/). Satellitenbilder in der Karte: Esri World Imagery.
+Alle Angaben aus öffentlichen Quellen, ohne Gewähr.
