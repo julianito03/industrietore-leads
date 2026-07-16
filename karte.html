@@ -56,16 +56,16 @@ function baseLayers(){
       id:'sat', data:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       minZoom:0, maxZoom:19, tileSize:256,
       renderSubLayers: p => {
-        const {west,south,east,north} = p.tile.bbox;
-        return new deck.BitmapLayer(p, {data:null, image:p.data, bounds:[west,south,east,north]});
+        const bb = p.tile.boundingBox ? {west:p.tile.boundingBox[0][0], south:p.tile.boundingBox[0][1], east:p.tile.boundingBox[1][0], north:p.tile.boundingBox[1][1]} : p.tile.bbox;
+        return new deck.BitmapLayer(p, {data:null, image:p.data, bounds:[bb.west,bb.south,bb.east,bb.north]});
       }
     }),
     new deck.TileLayer({
       id:'lbl', data:'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
       minZoom:0, maxZoom:19, tileSize:256, opacity:0.9,
       renderSubLayers: p => {
-        const {west,south,east,north} = p.tile.bbox;
-        return new deck.BitmapLayer(p, {data:null, image:p.data, bounds:[west,south,east,north]});
+        const bb = p.tile.boundingBox ? {west:p.tile.boundingBox[0][0], south:p.tile.boundingBox[0][1], east:p.tile.boundingBox[1][0], north:p.tile.boundingBox[1][1]} : p.tile.bbox;
+        return new deck.BitmapLayer(p, {data:null, image:p.data, bounds:[bb.west,bb.south,bb.east,bb.north]});
       }
     })
   ];
