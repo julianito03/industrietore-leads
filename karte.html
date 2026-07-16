@@ -104,7 +104,7 @@ function layers(){
     L.push(new deck.HexagonLayer({
       id:'hex',data:src,getPosition:o=>o.p,
       radius:6000,coverage:0.82,extruded:true,
-      elevationScale:90,elevationRange:[0,60000],
+      elevationScale:1,elevationRange:[0,45000],
       colorRange:[[255,244,200],[250,220,110],[240,180,0],[214,140,0],[176,96,0],[130,60,10]],
       opacity:0.78,pickable:false
     }));
