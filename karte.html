@@ -24,6 +24,7 @@ body{font:13px/1.4 "Helvetica Neue",Arial,sans-serif;color:var(--ink);background
 #pop b.co{font-size:13.5px}
 #pop .chip{background:#F0B400;color:#1A1400;font-weight:700;padding:0 6px;font-size:10.5px;letter-spacing:.03em}
 #pop .chip.b{background:#E4E7EA;color:#22262B;font-weight:600}
+#pop .chip.g{background:#2E7D46;color:#fff}
 #pop a{color:#0B62C4}
 #pop .row{margin-top:5px}
 #pop .x{position:absolute;top:4px;right:8px;cursor:pointer;font-weight:700;color:#5A626C}
@@ -72,12 +73,12 @@ function baseLayers(){
 }
 function popupHTML(o){
   const sat=`https://maps.google.com/?q=${o.lat.toFixed(6)},${o.lon.toFixed(6)}&t=k`;
-  let h=`<b class="co">${esc(o.co)}</b> <span class="chip ${o.ver?'':'b'}">${o.ver?'VERIFIZIERT':'BASIS'}</span>`;
+  let h=`<b class="co">${esc(o.co)}</b> <span class="chip ${o.ver?'':(o.sat?'g':'b')}">${o.ver?'VERIFIZIERT':(o.sat?'SAT-GEPRÜFT':'BASIS')}</span>`;
   h+=`<div class="row">${esc([o.plz,o.ci].filter(Boolean).join(' '))}${o.bl?' · '+esc(o.bl):''}</div>`;
   if(o.ad)h+=`<div class="row">${esc(o.ad)}</div>`;
   if(o.ind)h+=`<div class="row"><i>${esc(o.ind)}</i></div>`;
   if(o.br)h+=`<div class="row">Marke: <b>${esc(o.br)}</b>${o.yr?' ('+esc(o.yr)+')':''}</div>`;
-  if(o.doors)h+=`<div class="row">${esc(o.doors)}</div>`;
+  if(o.doors)h+=`<div class="row">${esc(o.doors)}</div>`;else if(o.sat)h+=`<div class="row">${esc(o.sat)}</div>`;
   const L=[`<a href="${sat}" target="_blank" rel="noopener">Satellit</a>`];
   if(o.src)L.push(`<a href="${esc(o.src)}" target="_blank" rel="noopener">Quelle</a>`);
   if(o.foto)L.push(`<a href="${esc(o.foto)}" target="_blank" rel="noopener">Foto</a>`);
@@ -119,7 +120,7 @@ fetch('data/leads.min.json').then(r=>r.json()).then(d=>{
     ver:r[F.tier]==='verifiziert',
     co:r[F.company],ad:r[F.address],plz:r[F.plz],ci:r[F.city],bl:r[F.bundesland],
     ind:r[F.industry],br:r[F.brand],doors:r[F.doors_in_use],yr:r[F.year],
-    ph:r[F.phone],em:r[F.email],web:r[F.website],src:r[F.source_url],foto:r[F.photo_url],
+    ph:r[F.phone],em:r[F.email],web:r[F.website],src:r[F.source_url],foto:r[F.photo_url],sat:r[F.sat_check],
     lat:r[F.lat],lon:r[F.lon]
   }));
   document.getElementById('count').textContent=DATA.length.toLocaleString('de-DE')+' Standorte in Deutschland · Stand 07/2026';

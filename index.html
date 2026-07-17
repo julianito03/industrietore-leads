@@ -44,6 +44,7 @@ tr:hover td{background:var(--accent-dim)}
 .muted{color:var(--ink-2);font-size:12px}
 .chip{display:inline-block;background:var(--chip);padding:1px 7px;font-size:11px;letter-spacing:.03em;margin-top:2px}
 .chip.v{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.chip.s{background:var(--ok);color:#fff;font-weight:700}
 .doors{max-width:340px;font-size:12.5px}
 .iconlinks{display:flex;gap:8px;white-space:nowrap}
 .iconlinks a{display:inline-flex;align-items:center;gap:4px;font-size:12px;text-decoration:none;border:1px solid var(--line);padding:3px 7px}
@@ -87,6 +88,7 @@ footer{border-top:1px solid var(--line);padding:16px 0 40px;color:var(--ink-3);f
     <select id="tier">
       <option value="">Alle Einträge</option>
       <option value="verifiziert">Nur VERIFIZIERT (Quelle + Tor-Detail)</option>
+      <option value="sat">Nur SAT-GEPRÜFT (Rampen im Luftbild erkennbar)</option>
       <option value="basis">Nur BASIS (Standortdaten)</option>
     </select>
     <select id="brand"><option value="">Alle Marken</option></select>
@@ -127,6 +129,7 @@ fetch('data/leads.min.json').then(r=>r.json()).then(d=>{
     [ROWS.length.toLocaleString('de-DE'),'Einträge gesamt'],
     [ROWS.filter(r=>r[F.tier]==='verifiziert').length,'verifiziert'],
     [ROWS.filter(r=>r[F.brand]).length,'mit Marke'],
+    [ROWS.filter(r=>r[F.sat_check]).length.toLocaleString('de-DE'),'SAT-geprüft'],
     [ROWS.filter(r=>r[F.phone]||r[F.email]).length.toLocaleString('de-DE'),'mit Direktkontakt'],
     [ROWS.filter(r=>r[F.website]).length.toLocaleString('de-DE'),'mit Website'],
     [ROWS.filter(r=>r[F.lat]).length.toLocaleString('de-DE'),'auf der Karte'],
@@ -139,7 +142,7 @@ function apply(){
   const b=bl.value,t=tier.value,m=brand.value,k=kontakt.value;
   VIEW=ROWS.filter(r=>{
     if(b&&r[F.bundesland]!==b)return false;
-    if(t&&r[F.tier]!==t)return false;
+    if(t==='sat'){if(!r[F.sat_check])return false;}else if(t&&r[F.tier]!==t)return false;
     if(m&&r[F.brand]!==m)return false;
     if(k&&!r[F[k]])return false;
     if(q){const hay=[r[F.company],r[F.city],r[F.plz],r[F.industry],r[F.brand],r[F.address],r[F.doors_in_use]].join(' ').toLowerCase();if(!hay.includes(q))return false;}
@@ -163,11 +166,11 @@ function render(){
     if(r[F.email])kontakt.push(`<a href="mailto:${esc(r[F.email])}"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14"/><path d="M3 7l9 6 9-6"/></svg>Mail</a>`);
     if(r[F.website])kontakt.push(`<a href="${esc(r[F.website])}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg>Web</a>`);
     return `<tr>
-      <td><div class="co">${esc(r[F.company]||'')}</div><span class="chip ${r[F.tier]==='verifiziert'?'v':''}">${r[F.tier]==='verifiziert'?'VERIFIZIERT':'BASIS'}</span></td>
+      <td><div class="co">${esc(r[F.company]||'')}</div><span class="chip ${r[F.tier]==='verifiziert'?'v':(r[F.sat_check]?'s':'')}">${r[F.tier]==='verifiziert'?'VERIFIZIERT':(r[F.sat_check]?'SAT-GEPRÜFT':'BASIS')}</span></td>
       <td>${esc(loc)}<div class="muted">${esc(r[F.bundesland]||'')}</div><div class="muted">${esc(r[F.address]||'')}</div></td>
       <td>${esc(r[F.industry]||'—')}</td>
       <td>${r[F.brand]?`<b>${esc(r[F.brand])}</b>`:'—'}${r[F.year]?`<div class="muted">${esc(r[F.year])}</div>`:''}</td>
-      <td class="doors">${esc(r[F.doors_in_use]||'—')}</td>
+      <td class="doors">${esc(r[F.doors_in_use]||r[F.sat_check]||'—')}</td>
       <td><div class="iconlinks" style="flex-direction:column;align-items:flex-start;gap:4px">${kontakt.join('')||'—'}</div></td>
       <td><div class="iconlinks" style="flex-direction:column;align-items:flex-start;gap:4px">${links.join('')}</div></td>
     </tr>`;
