@@ -1,7 +1,7 @@
 # Verladeregister Deutschland — Tor-Leads
 
 Deutschlandweite Lead-Datenbank: Betriebe mit Überladebrücken, Verladerampen und Industrietoren.
-**24.625 Standorte** (Stand 07/2026), davon **663 verifiziert** (Tor-/Verladetechnik-Einsatz per Quelle belegt: Herstellerreferenzen Hörmann/Novoferm/EFAFLEX/PROMStahl/Butt u. a., Fachpresse, Projektmeldungen) und ~24.000 Basis-Standorte (Lager-, Logistik-, Produktions- und Depotstandorte aus OpenStreetMap).
+**25.381 Standorte** (Stand 07/2026), davon **1.447 verifiziert** (Tor-/Verladetechnik-Einsatz per Quelle belegt: Herstellerreferenzen Hörmann/Novoferm/EFAFLEX/PROMStahl/Butt u. a., Fachpresse, Projektmeldungen) und ~24.000 Basis-Standorte (Lager-, Logistik-, Produktions- und Depotstandorte aus OpenStreetMap).
 
 ## Nutzung
 
